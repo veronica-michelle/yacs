@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bars3Icon } from '@heroicons/react/24/solid';
+import { Bars3Icon, UserCircleIcon } from '@heroicons/react/24/solid';
 import { Separator } from "./ui/Separator"
 import ClassSearch from './ui/ClassSearch';
 import ThemeToggle from './theme/ThemeToggle';
@@ -8,6 +8,10 @@ import { NavLink } from "react-router-dom";
 function Navbar() {
   const link = ({ isActive }: { isActive: boolean }) =>
     `px-3 py-1 rounded hover:text-blue-500 ${isActive ? "text-blue-400" : "text-text"}`;
+  
+  const iconLink = ({ isActive }: { isActive: boolean }) =>
+    `p-2 rounded hover:text-blue-500 hover:bg-blue-500/10 transition-colors ${isActive ? "text-blue-400 bg-blue-400/10" : "text-text"}`;
+  
   return (
     <>
     <div className="flex justify-between items-center p-4 text-input-foreground bg-header border-b border-b-border">
