@@ -85,3 +85,75 @@ const InfoSection: React.FC<{ title: string; children: React.ReactNode }> = ({ t
     </div>
   </div>
 );
+
+// ---------------------- Main Page ----------------------
+const PROFILE_STORAGE_KEY = "user_profile_v1";
+
+export default function ProfilePage() {
+  
+  // Mock academic profile data
+  const [academicProfile] = useState<AcademicProfile>({
+    major: "Computer Science",
+    secondMajor: "Mathematics", // Can be undefined
+    track: "AI/Machine Learning",
+    secondMajorTrack: "Applied Mathematics",
+    minor: "Business Administration",
+    secondMinor: undefined, // Can be undefined to show "Add" state
+    minorTrack: "Entrepreneurship",
+    secondMinorTrack: undefined,
+    hassPathway: "Arts"
+  });
+  
+  const [profile, setProfile] = useState<UserProfile>(() => {
+    const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {}
+    }
+    return {
+      fullName: "Alex Johnson",
+      studentId: "662012345",
+      expectedGraduation: "May 2027",
+      major: academicProfile.major,
+      track: academicProfile.track,
+      minor: academicProfile.minor,
+      gpa: 3.75,
+      email: "johna@rpi.edu",
+    };
+  });
+
+  // Mock GPA data
+  const gpaData = {
+    gpa: 3.75,
+    totalEarnedHours: 95
+  };
+
+  useEffect(() => {
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+  }, [profile]);
+
+  const handleEditProfile = () => {
+    alert("Feature not added yet");
+  };
+
+  const handleMajorClick = () => {
+    alert("Feature not added yet");
+  };
+
+  const handleMinorClick = () => {
+    alert("Feature not added yet");
+  };
+
+  const handleNavigateToProgress = (type: string, program?: string) => {
+    alert("Feature not added yet");
+  };
+
+  const handleEdit = (field: string) => {
+    alert("Feature not added yet");
+  };
+
+  const handleSelectTrack = (programName: string, trackType: string) => {
+    alert("Feature not added yet");
+  };
+
