@@ -91,18 +91,51 @@ const PROFILE_STORAGE_KEY = "user_profile_v1";
 
 export default function ProfilePage() {
   
-  // Mock academic profile data
-  const [academicProfile] = useState<AcademicProfile>({
+  // Mock academic data (self-contained; no external hooks)
+  const majors = [
+    { name: "Computer Science", tracks: ["AI/Machine Learning"] },
+    { name: "Mathematics", tracks: ["Applied Mathematics"] },
+  ];
+  const minors = [
+    { name: "Business Administration", tracks: ["Entrepreneurship"] },
+  ];
+  const pathways = [
+    { name: "Arts" },
+  ];
+
+  // Mock academic profile state
+  const [academicProfile, setAcademicProfile] = useState<AcademicProfile>({
     major: "Computer Science",
-    secondMajor: "Mathematics", // Can be undefined
+    secondMajor: "Mathematics",
     track: "AI/Machine Learning",
     secondMajorTrack: "Applied Mathematics",
     minor: "Business Administration",
-    secondMinor: undefined, // Can be undefined to show "Add" state
+    secondMinor: undefined,
     minorTrack: "Entrepreneurship",
     secondMinorTrack: undefined,
-    hassPathway: "Arts"
+    hassPathway: "Arts",
   });
+
+  // Mock GPA data
+  const gpaData = {
+    gpa: 3.75,
+    totalEarnedHours: 95,
+  };
+
+  // Modal states for editing
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingField, setEditingField] = useState<string>("");
+  const [tempValue, setTempValue] = useState<string>("");
+  const [showPrimaryDropdown, setShowPrimaryDropdown] = useState(false);
+  const [showSecondaryDropdown, setShowSecondaryDropdown] = useState(false);
+  const [primarySearchResults, setPrimarySearchResults] = useState<string[]>([]);
+  const [secondarySearchResults, setSecondarySearchResults] = useState<string[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
+  // Use service data instead of hardcoded arrays
+  const getMajorNames = () => majors.map(m => m.name);
+  const getMinorNames = () => minors.map(m => m.name);
+  const getPathwayNames = () => pathways.map(p => p.name);
   
   const [profile, setProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
@@ -118,42 +151,169 @@ export default function ProfilePage() {
       major: academicProfile.major,
       track: academicProfile.track,
       minor: academicProfile.minor,
-      gpa: 3.75,
+      gpa: gpaData?.gpa || 0.0,
       email: "johna@rpi.edu",
     };
   });
 
-  // Mock GPA data
-  const gpaData = {
-    gpa: 3.75,
-    totalEarnedHours: 95
-  };
-
   useEffect(() => {
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
   }, [profile]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.relative')) {
+        setShowPrimaryDropdown(false);
+        setShowSecondaryDropdown(false);
+      }
+    };
+
+    if (showPrimaryDropdown || showSecondaryDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showPrimaryDropdown, showSecondaryDropdown]);
 
   const handleEditProfile = () => {
     alert("Feature not added yet");
   };
 
   const handleMajorClick = () => {
-    alert("Feature not added yet");
+    alert("Major progress tracking functionality coming soon!");
   };
 
   const handleMinorClick = () => {
-    alert("Feature not added yet");
+    alert("Minor progress tracking functionality coming soon!");
   };
 
   const handleNavigateToProgress = (type: string, program?: string) => {
-    alert("Feature not added yet");
+    if (type === 'major') {
+      alert(`Major progress for ${program} - Feature coming soon!`);
+    } else if (type === 'minor') {
+      alert("Minor progress tracking - Feature coming soon!");
+    } else if (type === 'pathway') {
+      alert("Pathway progress tracking - Feature coming soon!");
+    }
   };
 
   const handleEdit = (field: string) => {
     alert("Feature not added yet");
   };
 
+  const handlePrimarySearchInput = (value: string) => {
+    if (editingField === "major") {
+      // Update the actual profile major value
+      setProfile((prev: UserProfile) => ({ ...prev, major: value }));
+      const filtered = getMajorNames().filter(name => 
+        name.toLowerCase().includes(value.toLowerCase())
+      );
+      setPrimarySearchResults(filtered);
+    } else if (editingField === "minor") {
+      // Update the actual profile minor value
+      setProfile((prev: UserProfile) => ({ ...prev, minor: value }));
+      const filtered = getMinorNames().filter(name => 
+        name.toLowerCase().includes(value.toLowerCase())
+      );
+      setPrimarySearchResults(filtered);
+    } else if (editingField === "hassPathway") {
+      setTempValue(value);
+      const filtered = getPathwayNames().filter(name => 
+        name.toLowerCase().includes(value.toLowerCase())
+      );
+      setPrimarySearchResults(filtered);
+    }
+    setShowPrimaryDropdown(true);
+  };
+
+  const handleSecondarySearchInput = (value: string) => {
+    setTempValue(value);
+    let options: string[] = [];
+    
+    if (editingField === "major" || editingField === "secondMajor") {
+      options = getMajorNames().filter(name => name !== academicProfile.major); // Exclude primary major
+    } else if (editingField === "minor" || editingField === "secondMinor") {
+      options = getMinorNames().filter(name => name !== profile.minor); // Exclude primary minor
+    }
+    
+    const filtered = options.filter(name => 
+      name.toLowerCase().includes(value.toLowerCase())
+    );
+    setSecondarySearchResults(filtered);
+    setShowSecondaryDropdown(true);
+  };
+
+  const selectPrimaryOption = (option: string) => {
+    if (editingField === "major") {
+      setProfile((prev: UserProfile) => ({ ...prev, major: option }));
+    } else if (editingField === "minor") {
+      setProfile((prev: UserProfile) => ({ ...prev, minor: option }));
+    } else if (editingField === "hassPathway") {
+      setTempValue(option);
+    }
+    setShowPrimaryDropdown(false);
+  };
+
+  const selectSecondaryOption = (option: string) => {
+    setTempValue(option);
+    setShowSecondaryDropdown(false);
+  };
+
+  const saveEdit = () => {
+    // Validation
+    if (editingField === "gpa") {
+      const gpaValue = parseFloat(tempValue);
+      if (isNaN(gpaValue) || gpaValue < 0 || gpaValue > 4) {
+        setErrorMessage("GPA must be a number between 0.0 and 4.0");
+        return;
+      }
+      setProfile((prev: UserProfile) => ({ ...prev, gpa: gpaValue }));
+    } else if (editingField === "secondMajor") {
+      if (tempValue && tempValue === profile.major) {
+        setErrorMessage("Second major cannot be the same as your primary major.");
+        return;
+      }
+      setAcademicProfile((prev: AcademicProfile) => ({ ...prev, secondMajor: tempValue || undefined }));
+    } else if (editingField === "secondMinor") {
+      if (tempValue && tempValue === profile.minor) {
+        setErrorMessage("Second minor cannot be the same as your primary minor.");
+        return;
+      }
+      setAcademicProfile((prev: AcademicProfile) => ({ ...prev, secondMinor: tempValue || undefined }));
+    } else if (editingField === "hassPathway") {
+      if (!tempValue.trim()) {
+        setErrorMessage("Please select a HASS pathway.");
+        return;
+      }
+      setAcademicProfile((prev: AcademicProfile) => ({ ...prev, hassPathway: tempValue }));
+    } else if (editingField === "major") {
+      setAcademicProfile((prev: AcademicProfile) => ({ ...prev, major: profile.major }));
+    } else if (editingField === "minor") {
+      setAcademicProfile((prev: AcademicProfile) => ({ ...prev, minor: profile.minor || undefined }));
+    }
+
+    // Close modal
+    setShowEditModal(false);
+    setShowPrimaryDropdown(false);
+    setShowSecondaryDropdown(false);
+    setErrorMessage("");
+  };
+
   const handleSelectTrack = (programName: string, trackType: string) => {
-    alert("Feature not added yet");
+    alert(`Track selection for ${programName} (${trackType}) - Feature coming soon!`);
+  };
+
+  // Function to check if program has tracks using real data
+  const getTracksForProgram = (programName: string, isMinor: boolean = false): any[] => {
+    if (isMinor) {
+      const minor = minors.find(m => m.name === programName);
+      return minor?.tracks || [];
+    } else {
+      const major = majors.find(m => m.name === programName);
+      return major?.tracks || [];
+    }
   };
 
