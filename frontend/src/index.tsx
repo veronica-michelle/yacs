@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppThemeProvider } from './components/theme/ThemeProvider';
 import App from './app/App';
 import HomePage from "./pages/HomePage";
+import ProfilePage from "./pages/ProfilePage";
 import FourYearPlannerPage from "./pages/FourYearPlannerPage";
 import { ScheduleProvider } from "./context/schedule-context";
 
@@ -19,6 +20,7 @@ root.render(
       <Route path="/" element={<App />}>
         <Route index element={<HomePage />} />
         <Route path="planner" element={<FourYearPlannerPage />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
     </Routes>
     </BrowserRouter>
